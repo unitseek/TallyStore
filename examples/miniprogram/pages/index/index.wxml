@@ -1,0 +1,45 @@
+<scroll-view class="scroll" scroll-y>
+  <view class="page">
+    <view class="title">
+      <text>TallyStore · 页面 / 组件集成（Skyline）</text>
+    </view>
+
+    <view class="card">
+      <view class="row">
+        <text class="label">当前 count</text>
+        <text class="value">{{count}}</text>
+      </view>
+      <view class="row">
+        <text class="label">doubled（getter）</text>
+        <text class="value">{{doubled}}</text>
+      </view>
+      <view class="row">
+        <text class="label">进入页面时恢复的 count</text>
+        <text class="value">{{restoredCount}}</text>
+      </view>
+    </view>
+
+    <view class="buttons">
+      <button class="btn btn-inc" type="primary" bindtap="inc"><text>+1</text></button>
+      <button class="btn btn-dec" bindtap="dec"><text>-1</text></button>
+    </view>
+    <view class="hint">
+      <text>按钮直接调用 mapActions 映射到页面的方法；data 由 mapState / mapGetters 自动 setData。</text>
+    </view>
+
+    <view class="buttons">
+      <button class="btn" bindtap="goCart"><text>打开分包页面</text></button>
+      <button class="btn" bindtap="goLegacy"><text>打开未迁移页面</text></button>
+    </view>
+    <view class="hint">
+      <text>
+        分包页面（packageA/pages/cart）只通过 getApp().globalData.store 取主包 Store；未迁移页面 （pages/legacy）保留 globalData 写法，两者可与 Store 长期共存。
+      </text>
+    </view>
+
+    <counter />
+    <view class="hint">
+      <text>上方是 withComponentStore 的组件：与页面共享同一份 store，detached 时自动退订。</text>
+    </view>
+  </view>
+</scroll-view>

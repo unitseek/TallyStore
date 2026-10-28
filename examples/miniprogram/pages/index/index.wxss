@@ -1,0 +1,57 @@
+/* Skyline 不支持页面级全局滚动：滚动容器是 scroll-view，必须给固定高度与安全区 padding */
+.scroll {
+  height: 100vh;
+  box-sizing: border-box;
+  padding: calc(env(safe-area-inset-top) + 88rpx) 24rpx calc(env(safe-area-inset-bottom) + 24rpx);
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  color: #6b7280;
+}
+
+.value {
+  font-size: 32rpx;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.buttons {
+  display: flex;
+  gap: 24rpx;
+}
+
+.btn {
+  flex: 1;
+}
+
+.hint {
+  color: #6b7280;
+  font-size: 24rpx;
+  line-height: 1.6;
+}

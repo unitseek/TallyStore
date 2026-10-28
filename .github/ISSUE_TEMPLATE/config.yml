@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞（私密报告）
+    url: https://github.com/unitseek/tallystore/security/advisories/new
+    about: 请勿在公开 Issue 中披露漏洞细节，使用 GitHub Security Advisories。
+  - name: Issue 分级与响应目标（SLA）
+    url: https://github.com/unitseek/tallystore/blob/main/docs/ISSUE-TRIAGE.md
+    about: 提交前按阻断/严重/一般/建议选择分级；首次响应、EOL 公告与复盘要求见该文档。
+  - name: 文档与使用指南
+    url: https://github.com/unitseek/tallystore/tree/main/docs
+    about: 先看文档索引、使用指南与 API 参考，很多问题已有答案。

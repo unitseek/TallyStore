@@ -1,0 +1,10 @@
+# pnpm 配置：本仓库只有根包，无子包。
+# packages: [] 显式声明「无工作区子包」：避免 pnpm 隐式推导工作区成员/告警。
+packages: []
+# nodeLinker: hoisted —— 部分 Windows 环境无法遍历 junction/重解析点，
+# isolated 布局会让依赖解析整体失败；代价是可能出现幽灵依赖。
+allowBuilds:
+  esbuild: true
+  '@parcel/watcher': true
+  unrs-resolver: true
+nodeLinker: hoisted

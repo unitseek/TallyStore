@@ -1,0 +1,4 @@
+# 由 scripts/sync-lib.mjs 从仓库根 dist-weapp 复制，已内置提交；改库后重跑并提交
+node_modules/
+# 开发者工具本地私有配置
+project.private.config.json

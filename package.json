@@ -1,0 +1,94 @@
+{
+  "name": "@unitseek/tallystore",
+  "version": "0.1.0",
+  "description": "原生微信小程序状态管理库：Store + 页面/组件/App 集成 + 持久化，零运行时依赖",
+  "type": "module",
+  "miniprogram": "dist-weapp",
+  "types": "types/index.d.ts",
+  "sideEffects": false,
+  "typesVersions": {
+    "*": {
+      "plugins": ["types/plugins.d.ts"],
+      "plugins/persistence": ["types/plugins/persistence.d.ts"],
+      "plugins/logger": ["types/plugins/logger.d.ts"]
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts"
+    },
+    "./plugins": {
+      "types": "./types/plugins.d.ts"
+    },
+    "./plugins/persistence": {
+      "types": "./types/plugins/persistence.d.ts"
+    },
+    "./plugins/logger": {
+      "types": "./types/plugins/logger.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist-weapp", "types"],
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.tests.json",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --maxWorkers=2 --coverageReporters=text-summary --coverageReporters=text --coverageReporters=json-summary --coverageReporters=json",
+    "test:contract": "jest tests/contract",
+    "coverage:manifest": "node scripts/coverage-manifest.mjs",
+    "smoke:dual-renderer": "node scripts/dual-renderer-smoke.mjs",
+    "build:types": "tsc -p tsconfig.types.json",
+    "build:weapp": "node scripts/build-weapp.mjs",
+    "build": "node scripts/build.mjs",
+    "size": "node scripts/size.mjs",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\" \"bench/**/*.mjs\" \"bench/**/*.md\" \"examples/**/*.{js,mjs,md,json}\" \"*.md\" \"docs/**/*.md\" \"skills/**/*.md\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"bench/**/*.mjs\" \"bench/**/*.md\" \"examples/**/*.{js,mjs,md,json}\" \"*.md\" \"docs/**/*.md\" \"skills/**/*.md\"",
+    "prepublishOnly": "pnpm run format:check && pnpm run typecheck && pnpm run typecheck:tests && pnpm run build && pnpm run test:ci && pnpm run e2e && pnpm run smoke:dual-renderer && pnpm run coverage:manifest && pnpm run check:publish && pnpm run check:boundary examples/miniprogram && pnpm run size:gate && pnpm run check:repro && pnpm run api:report -- --check && pnpm run check:privacy && pnpm run release:metadata",
+    "examples:sync": "node examples/miniprogram/scripts/sync-lib.mjs",
+    "e2e": "node examples/miniprogram/e2e/host-smoke.mjs",
+    "e2e:devtools": "node examples/miniprogram/e2e/automator.mjs",
+    "bench": "node bench/run.mjs",
+    "bench:quick": "node bench/run.mjs --quick",
+    "bench:save": "node bench/run.mjs --save bench/baseline.json",
+    "bench:compare": "node bench/run.mjs --compare bench/baseline.json",
+    "check:publish": "node scripts/check-publish-surface.mjs",
+    "size:gate": "node scripts/size.mjs --budget",
+    "check:boundary": "node scripts/check-package-boundary.mjs",
+    "check:privacy": "node scripts/check-privacy-api.mjs",
+    "sbom": "node scripts/sbom.mjs",
+    "check:repro": "node scripts/check-reproducible.mjs",
+    "api:report": "node scripts/api-report.mjs",
+    "release:manifest": "node scripts/release-manifest.mjs",
+    "release:metadata": "node scripts/check-release-metadata.mjs",
+    "release:check": "node scripts/check-release-metadata.mjs && node scripts/release-manifest.mjs"
+  },
+  "keywords": ["state-management", "miniprogram", "wechat", "weixin", "skyline", "typescript", "store", "lightweight"],
+  "author": "UnitSeek",
+  "license": "MIT",
+  "packageManager": "pnpm@12.11.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unitseek/tallystore.git"
+  },
+  "bugs": {
+    "url": "https://github.com/unitseek/tallystore/issues"
+  },
+  "homepage": "https://github.com/unitseek/tallystore#readme",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "24.8.1",
+    "esbuild": "^0.28.2",
+    "jest": "^30.5.2",
+    "prettier": "^3.8.1",
+    "ts-jest": "^29.4.15",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

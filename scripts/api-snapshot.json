@@ -1,0 +1,74 @@
+{
+  "version": "0.1.0",
+  "generatedAt": "snapshot",
+  "surface": {
+    ".": [
+      "DEFAULT_SENSITIVE_KEY_PATTERNS",
+      "HookSystem",
+      "Store",
+      "TallyStoreError",
+      "addSensitiveKeyPatterns",
+      "createRaceGuard",
+      "createStore",
+      "defineStores",
+      "isSensitiveKey",
+      "isTallyStoreError",
+      "maskForLog",
+      "maskSensitiveValue",
+      "resetSensitiveKeyPatterns",
+      "unbindStore",
+      "withAppStore",
+      "withComponentStore",
+      "withPageStore"
+    ],
+    "./plugins": [
+      "WxStorageBackend",
+      "loggerPlugin",
+      "metricsPlugin",
+      "persistencePlugin"
+    ],
+    "./plugins/persistence": [
+      "WxStorageBackend",
+      "persistencePlugin"
+    ],
+    "./plugins/logger": [
+      "loggerPlugin"
+    ],
+    "Store.prototype": [
+      "$patch",
+      "$replaceState",
+      "$reset",
+      "$restore",
+      "$snapshot",
+      "_commitPatchEffects",
+      "_createDirtyTrackingProxy",
+      "_createPluginUninstaller",
+      "_drainPluginUninstalls",
+      "_getActionState",
+      "_initializeActionsAndGetters",
+      "_initializeState",
+      "_onBatchEnd",
+      "_rebuildStateProxyManager",
+      "_scheduleNotify",
+      "_withInternalAccess",
+      "batch",
+      "destroy",
+      "destroyed",
+      "dispatch",
+      "endBatch",
+      "getState",
+      "getStateProtectionConfig",
+      "getSubscriptionCount",
+      "getter",
+      "getterNames",
+      "isStateKeyDirty",
+      "isStateProtectionEnabled",
+      "setState",
+      "setStateProtection",
+      "startBatch",
+      "state",
+      "subscribe",
+      "use"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+<view class="page">
+  <view class="title">
+    <text>分包页面 · packageA/pages/cart/cart</text>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <text class="label">Store 来源</text>
+      <text class="value">{{source}}</text>
+    </view>
+    <view class="row">
+      <text class="label">count（主包 Store）</text>
+      <text class="value">{{count}}</text>
+    </view>
+    <view class="row">
+      <text class="label">doubled（getter）</text>
+      <text class="value">{{doubled}}</text>
+    </view>
+  </view>
+
+  <view class="buttons">
+    <button class="btn btn-inc" type="primary" bindtap="addOne"><text>+1</text></button>
+    <button class="btn btn-dec" bindtap="removeOne"><text>-1</text></button>
+  </view>
+  <view class="hint">
+    <text>本页未创建 Store：数据来自 getApp().globalData.store，action 直接改主包 Store。</text>
+  </view>
+</view>

@@ -1,0 +1,42 @@
+.counter {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.counter-title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.counter-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.counter-label {
+  color: #6b7280;
+}
+
+.counter-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+
+.counter-btn {
+  flex: 1;
+}
+
+.counter-tip {
+  color: #6b7280;
+  font-size: 24rpx;
+}

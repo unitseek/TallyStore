@@ -1,0 +1,93 @@
+name: Bug 报告
+description: 报告可复现的问题（提交前请先查文档与现有 Issue）
+title: '[Bug] '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请先阅读 [docs/](https://github.com/unitseek/tallystore/tree/main/docs) 与
+        [skills/tallystore](https://github.com/unitseek/tallystore/tree/main/skills/tallystore)，
+        并搜索现有 Issue；本库仅支持原生微信小程序。
+        问题分级（阻断 / 严重 / 一般 / 建议）与响应目标见
+        [docs/ISSUE-TRIAGE.md](https://github.com/unitseek/tallystore/blob/main/docs/ISSUE-TRIAGE.md)。
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 问题分级（必填，定义见 docs/ISSUE-TRIAGE）
+      description: 阻断=数据丢失/静默不更新/生产不可用；严重=核心功能不可用且无规避；一般=有影响可绕过；建议=改进/文档/体验
+      options:
+        - 'blocker — 阻断：数据丢失 / 静默不更新 / 无法启动等生产不可用（1 个工作日首次响应）'
+        - 'critical — 严重：核心功能不可用且无规避方式（2 个工作日首次响应）'
+        - 'normal — 一般：有明确影响但存在规避方式（5 个工作日首次响应）'
+        - 'suggestion — 建议：改进 / 文档 / 体验（5 个工作日确认收到）'
+    validations:
+      required: true
+  - type: input
+    id: library-version
+    attributes:
+      label: 库版本
+      description: package.json 中 @unitseek/tallystore 的版本
+      placeholder: 0.1.0-alpha.1
+    validations:
+      required: true
+  - type: input
+    id: base-library-version
+    attributes:
+      label: 微信基础库版本
+      description: 开发者工具「详情 → 本地设置」中的调试基础库版本，或线上日志里的基础库版本
+      placeholder: '3.15.0'
+    validations:
+      required: true
+  - type: input
+    id: devtools-version
+    attributes:
+      label: 微信开发者工具版本（可选）
+      description: 线上用户通常拿不到该版本号，可留空；请优先提供基础库版本与报错截图
+      placeholder: '1.06.x'
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: 运行环境（可多选）
+      description: 一个工程可同时使用页面 / 组件 / App 集成；只用核心 store 或自定义宿主请选「其它/混合」
+      multiple: true
+      options:
+        - Page
+        - Component
+        - App
+        - 其它/混合（核心 store、Node 测试、自定义宿主等）
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 最小复现
+      description: |
+        可直接运行的最小代码或操作步骤，包含 createStore / withPageStore 等配置。
+        请一并说明：真机还是开发者工具、机型/系统版本、是否分包或自定义组件环境。
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 控制台 / onError 日志（可选）
+      description: 完整日志能显著减少来回追问；粘贴前请脱敏（不要包含令牌、手机号等敏感信息）
+      placeholder: 控制台输出、onError 上报内容等
+  - type: textarea
+    id: expected-actual
+    attributes:
+      label: 期望结果与实际结果
+      description: 期望行为、实际行为，以及完整报错或截图
+      placeholder: |
+        期望：
+        实际：
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 提交前自查
+      options:
+        - label: 我已阅读 docs/ 与 skills/tallystore（或确认其中没有相关说明），并搜索过现有 Issue
+          required: true

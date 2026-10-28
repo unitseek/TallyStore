@@ -1,0 +1,30 @@
+{
+  "pages": ["pages/index/index", "pages/legacy/legacy"],
+  "subPackages": [
+    {
+      "root": "packageA",
+      "pages": ["pages/cart/cart"]
+    }
+  ],
+  "renderer": "skyline",
+  "componentFramework": "glass-easel",
+  "lazyCodeLoading": "requiredComponents",
+  "rendererOptions": {
+    "skyline": {
+      "defaultDisplayBlock": true,
+      "defaultContentBox": true,
+      "tagNameStyleIsolation": "legacy",
+      "enableScrollViewAutoSize": true,
+      "disableABTest": true
+    }
+  },
+  "window": {
+    "navigationBarTitleText": "TallyStore Demo",
+    "navigationBarBackgroundColor": "#1f2937",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f3f4f6",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

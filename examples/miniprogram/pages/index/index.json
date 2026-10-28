@@ -1,0 +1,9 @@
+{
+  "navigationStyle": "custom",
+  "disableScroll": true,
+  "usingComponents": {
+    "counter": "/components/counter/counter"
+  },
+  "componentFramework": "glass-easel",
+  "glassEaselWebview": true
+}

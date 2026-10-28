@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  # GitHub 的 concurrency 在同组已有运行时会把新入队运行置为 pending，并取消更早的 pending：
+  # - push（main）按 commit SHA 分组，保证每个提交都留下完整验证记录（仅关 cancel-in-progress 不够）
+  # - PR 仍按 ref 分组并取消旧运行，节省 CI
+  group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'pr' || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck src
+        run: pnpm run typecheck
+
+      - name: Typecheck tests (含类型测试 *.test-d.ts)
+        run: pnpm run typecheck:tests
+
+      - name: Format check
+        run: pnpm run format:check
+
+      # Build 在 Test 之前：tests/contract 的契约测试需要 dist-weapp 存在
+      # （本地未构建时契约用例自动 skip，CI 保证走真实发布产物）
+      - name: Build
+        run: pnpm run build
+
+      # 示例内置 miniprogram_npm 必须与当前 dist-weapp 一致；漂移会阻断
+      - name: Example prebuilt npm package in sync
+        run: |
+          pnpm run examples:sync
+          git diff --exit-code -- examples/miniprogram/miniprogram_npm
+          test -z "$(git status --porcelain -- examples/miniprogram/miniprogram_npm)"
+
+      #：版本化文档 + 示例一致性（依赖 build 产物校验 dist 入口与 exports 对应关系）
+      - name: Docs/examples consistency
+        run: |
+          node scripts/check-docs-version.mjs
+          node scripts/check-docs-examples.mjs
+
+      - name: Size gate (raw 预算 + 增长容差, )
+        run: pnpm run size:gate
+
+      - name: Test + coverage (含契约测试)
+        run: pnpm run test:ci
+
+      #：核心模块 100% 目标 + 例外清单归档；生成 coverage/core-manifest.json 并阻断未登记缺口
+      - name: Core coverage manifest ( 核心模块 100% + 例外清单)
+        run: pnpm run coverage:manifest
+
+      - name: Examples e2e (host simulated)
+        run: pnpm run e2e
+
+      #  验收 5：双渲染器冒烟的 CI 模拟证据（真实 DevTools/真机记录由发布负责人补录）
+      - name: Dual renderer smoke (WebView/Skyline, host simulated)
+        run: pnpm run smoke:dual-renderer
+
+      - name: Upload coverage & dual-renderer artifacts
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: quality-coverage-manifest
+          path: |
+            coverage/core-manifest.json
+            coverage/coverage-summary.json
+            coverage/dual-renderer-smoke.json
+            scripts/core-coverage-exceptions.json
+          if-no-files-found: error
+
+      - name: Check publish surface
+        run: pnpm run check:publish
+
+      # 示例工程已配置真实分包（packageA）；仍先用提交的违规 fixture 强制走判定逻辑
+      # （未检出即失败 = 门禁空转），再对示例工程做正向扫描
+      - name: Package boundary check (fixture violation + example project)
+        run: |
+          set +e
+          node scripts/check-package-boundary.mjs scripts/fixtures/boundary-violation
+          fixture_status=$?
+          set -e
+          if [ "$fixture_status" -ne 1 ]; then
+            echo "::error::分包边界违规 fixture 未被检出（门禁空转或脚本回归）"
+            exit 1
+          fi
+          node scripts/check-package-boundary.mjs examples/miniprogram
+
+      - name: Privacy API allowlist
+        run: pnpm run check:privacy
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level high
+
+      - name: Reproducible build
+        run: pnpm run check:repro
+
+      - name: API surface gate
+        run: pnpm run api:report -- --check
+
+      - name: Generate SBOM
+        run: pnpm run sbom
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: sbom
+          path: sbom.cdx.json
+          # 文件缺失时默认只告警；SBOM 发布物缺失必须让 job 失败
+          if-no-files-found: error

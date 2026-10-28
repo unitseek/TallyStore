@@ -1,0 +1,16 @@
+﻿/node_modules/
+/dist-weapp/
+/types/
+/wiki/
+/coverage/
+*.log
+.DS_Store
+.slim/
+.work/
+/sbom.cdx.json
+# 本地凭据/环境变量（示例文件例外）
+.env
+.env.*
+!.env.example
+*.pem
+*.key

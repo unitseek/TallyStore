@@ -1,0 +1,16 @@
+# 依赖目录：保持不锚定，覆盖根目录与示例工程内嵌套的 node_modules
+node_modules
+
+# 构建/覆盖率产物：锚定仓库根，避免任意层级同名目录被误忽略
+/dist-weapp
+/types
+/coverage
+/pnpm-lock.yaml
+
+# 源码类型目录当前未按 prettier 格式化（历史遗留）：显式列出，避免锚定 /types 后被误纳入格式门禁；
+# 格式化 src/types 属源码域改动，需单独 PR（ 遗留项）
+src/types
+
+# 各示例工程内由 scripts/sync-lib.mjs 生成的拷贝与开发者工具本地私有配置
+examples/**/miniprogram_npm
+examples/**/project.private.config.json

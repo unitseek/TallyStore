@@ -1,0 +1,19 @@
+<view class="page">
+  <view class="title">
+    <text>未迁移页面 · pages/legacy/legacy</text>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <text class="label">legacyCount（globalData）</text>
+      <text class="value">{{legacyCount}}</text>
+    </view>
+  </view>
+
+  <view class="buttons">
+    <button class="btn btn-inc" type="primary" bindtap="incLegacy"><text>+1</text></button>
+  </view>
+  <view class="hint">
+    <text>{{note}}：不依赖 Store，行为与接入分包前一致。</text>
+  </view>
+</view>

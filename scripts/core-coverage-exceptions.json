@@ -1,0 +1,136 @@
+{
+  "$schema": "core-coverage-exceptions（ 例外清单；条目 = 核心模块未覆盖语句/分支/函数；kind：unreachable=不可达 / defensive=防御性分支 / coverage-gap=已确认测试缺口待补）",
+  "version": 1,
+  "updatedAt": "2026-10-28",
+  "ownerField": "owner 为跟进人/批次；coverage-gap 条目必须随发布 manifest 归档并在后续批次补测",
+  "exceptions": [
+    {
+      "file": "src/core/store/Store.ts",
+      "line": 431,
+      "metric": "branches",
+      "kind": "unreachable",
+      "reason": "$snapshot 生效上限的 stateBytes<0 回退分支：snapshotBytes 与 stateBytes 由同一份深克隆状态估算，克隆对不可序列化值的判定同构，\"快照可估算而原状态不可估算\" 组合不可达，保留为防御性回退",
+      "owner": "fix-core"
+    },
+    {
+      "file": "src/core/store/Store.ts",
+      "line": 433,
+      "metric": "branches",
+      "kind": "unreachable",
+      "reason": "同上：stateBytes<0 才走 ?? 默认上限的 else 分支，随 431 行不可达",
+      "owner": "fix-core"
+    },
+    {
+      "file": "src/integrations/connect.ts",
+      "line": 221,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "clearFailedBinding 的 hostBindings 空槽清理：失败绑定在回滚前必已登记条目，byStore===undefined 分支仅在调用顺序变化时出现（防御性）",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/connect.ts",
+      "line": 223,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "同上：byStore 删空后清理宿主条目的分支，正常路径由解绑主流程处理，此处兜底",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/connect.ts",
+      "line": 302,
+      "metric": "branches",
+      "kind": "unreachable",
+      "reason": "同步泄漏告警中 countAfter<0「不可读」文案：进入该分支前已因 countBefore<=0 提前 return，countAfter=-1 时 countBefore 同为 -1，不可达",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/connect.ts",
+      "line": 313,
+      "metric": "statements",
+      "kind": "defensive",
+      "reason": "延迟复核回调的 reported 重入守卫：同步告警路径已 return、不会再调度复核，守卫仅防未来调度顺序变化",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/connect.ts",
+      "line": 313,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "同上：reported=true 时提前 return 的防御性分支",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/visibility.ts",
+      "line": 106,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "onReveal 的 realign 未注册分支：connectHost 的 mapper 总会 registerRealign，保留给独立使用 createBackgroundGate 的防御性兜底",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/visibility.ts",
+      "line": 165,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "失败保留批次写回时的同步重入缓存合并：正常路径 pendingBackground 已在 reveal 时复位为 undefined，仅 write 同步重入后台写入时才有值（宿主 setData 不提供同步重入，防御性保护）",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/with-store.ts",
+      "line": 94,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "生命周期清理失败的生产分支（!isProduction() 为 false）：单测进程恒为开发环境，生产分支由生产模式冒烟覆盖同类口径",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/with-store.ts",
+      "line": 98,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "清理错误非 Error 实例的归一化分支（error instanceof Error 为 false）：现有用例只抛 Error，防御性",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/with-store.ts",
+      "line": 213,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "保留 action 名冲突告警的生产分支（!isProduction() 为 false），单测进程不可达",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/with-store.ts",
+      "line": 400,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "实例成员不可重定义告警的生产分支（!isProduction() 为 false），单测进程不可达",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/utils.ts",
+      "line": 9,
+      "metric": "functions",
+      "kind": "defensive",
+      "reason": "estimateJsonBytes 的再导出绑定（export { estimateJsonBytes }）：无可执行函数体，Istanbul 记为未调用函数的统计口径噪声",
+      "owner": "fix-core"
+    },
+    {
+      "file": "src/integrations/utils.ts",
+      "line": 595,
+      "metric": "branches",
+      "kind": "defensive",
+      "reason": "微任务调度回调中 batch===undefined 的僵尸守卫：pending 被 flushNow 清除与 generation 递增同源，token 检查已拦截陈旧调度，分支不可达",
+      "owner": "fix-integrations"
+    },
+    {
+      "file": "src/integrations/utils.ts",
+      "line": 596,
+      "metric": "statements",
+      "kind": "defensive",
+      "reason": "同上：batch 为空时提前 return",
+      "owner": "fix-integrations"
+    }
+  ]
+}

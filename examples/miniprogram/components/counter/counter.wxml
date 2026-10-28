@@ -1,0 +1,20 @@
+<view class="counter">
+  <view class="counter-title">
+    <text>Component 集成（Skyline）</text>
+  </view>
+  <view class="counter-row">
+    <text class="counter-label">localCount</text>
+    <text class="counter-value">{{localCount}}</text>
+  </view>
+  <view class="counter-row">
+    <text class="counter-label">localDoubled</text>
+    <text class="counter-value">{{localDoubled}}</text>
+  </view>
+  <view class="counter-actions">
+    <button class="counter-btn counter-dec" size="mini" bindtap="decrement"><text>-1</text></button>
+    <button class="counter-btn" size="mini" bindtap="resetTip"><text>自定义方法</text></button>
+  </view>
+  <view class="counter-tip">
+    <text>{{tip}}</text>
+  </view>
+</view>

@@ -1,0 +1,223 @@
+name: Release
+
+#：发布自动化（workflow_dispatch；dry_run 默认 true）
+# - 门禁与 CI 同口径（typecheck/build/test+coverage/coverage:manifest/size:gate/api:report/check:privacy）
+# - 生成可追溯 artifact：tarball + release-manifest（sha256/files/SBOM/licenseChanges）+ SBOM + 覆盖率/体积摘要
+# - dry_run=false 才执行 npm stage publish --provenance 与 gh release create --draft（需要 NPM_TOKEN secret 与 id-token: write；npm 版本需支持 staged publishing）
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '发布版本号（必须与 package.json 一致，例如 0.1.0）'
+        required: true
+        type: string
+      dry_run:
+        description: 'dry run：只跑门禁并产出 manifest/artifact，不发布 npm、不创建 Release'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release gates, manifest and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Setup Node (npm registry auth + provenance OIDC)
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
+        with:
+          node-version: 22.14.0
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install npm with staged publishing support
+        run: npm install -g npm@11.15.0
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify requested version matches package.json
+        run: |
+          node -e "const pkg = require('./package.json'); if (pkg.version !== process.env.RELEASE_VERSION) { console.error('输入版本 ' + process.env.RELEASE_VERSION + ' 与 package.json ' + pkg.version + ' 不一致'); process.exit(1) }"
+
+
+      - name: Format check
+        run: pnpm run format:check
+      - name: Typecheck src
+        run: pnpm run typecheck
+
+      - name: Typecheck tests
+        run: pnpm run typecheck:tests
+
+      # 契约测试需要 dist-weapp：build 在 test 之前（与 ci.yml 同口径）
+      - name: Build
+        run: pnpm run build
+
+
+      - name: Example prebuilt npm package in sync
+        run: |
+          pnpm run examples:sync
+          git diff --exit-code -- examples/miniprogram/miniprogram_npm
+          test -z "$(git status --porcelain -- examples/miniprogram/miniprogram_npm)"
+      - name: Docs/version consistency
+        run: |
+          node scripts/check-docs-version.mjs
+          node scripts/check-docs-examples.mjs
+
+      - name: Test + coverage
+        run: pnpm run test:ci
+
+
+      - name: Examples e2e (host simulated)
+        run: pnpm run e2e
+
+      - name: Dual renderer smoke (host simulated)
+        run: pnpm run smoke:dual-renderer
+
+      - name: Package boundary check
+        run: pnpm run check:boundary examples/miniprogram
+
+      - name: Publish surface check
+        run: pnpm run check:publish
+
+      - name: Reproducible build
+        run: pnpm run check:repro
+      - name: Coverage manifest
+        run: pnpm run coverage:manifest
+
+      - name: Size gate
+        run: pnpm run size:gate
+
+      - name: Size report (JSON for release notes)
+        run: |
+          mkdir -p .release
+          node scripts/size.mjs --json > .release/size-report.json
+
+      - name: API surface gate
+        run: pnpm run api:report -- --check
+
+      - name: Privacy API allowlist
+        run: pnpm run check:privacy
+
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level high
+      - name: Generate SBOM
+        run: pnpm run sbom
+
+      - name: Release metadata (version / CHANGELOG / tag / notes)
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            pnpm run release:metadata
+          else
+            node scripts/check-release-metadata.mjs --tag "v${{ inputs.version }}" --require-tag
+          fi
+
+      - name: Release manifest (tarball sha256 / files / SBOM / licenses)
+        run: pnpm run release:manifest
+
+      - name: Upload release manifest + tarball
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: release-manifest
+          path: |
+            .release/release-manifest.json
+            .release/*.tgz
+          if-no-files-found: error
+          include-hidden-files: true
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: release-sbom
+          path: sbom.cdx.json
+          if-no-files-found: error
+          include-hidden-files: true
+
+      - name: Upload coverage manifest
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: release-coverage
+          path: |
+            coverage/coverage-summary.json
+            coverage/core-manifest.json
+          if-no-files-found: error
+          include-hidden-files: true
+
+      - name: Upload size report
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: release-size
+          path: .release/size-report.json
+          if-no-files-found: error
+          include-hidden-files: true
+
+      # Release Notes = 四要素模板 + 自动生成的 manifest/SBOM/体积/覆盖率摘要
+      - name: Compose release notes (template + artifact summary)
+        if: inputs.dry_run == false
+        run: |
+          cp docs/RELEASE-NOTES-TEMPLATE.md .release/release-notes.md
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          const manifest = JSON.parse(fs.readFileSync('.release/release-manifest.json', 'utf8'))
+          const size = JSON.parse(fs.readFileSync('.release/size-report.json', 'utf8'))
+          const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'))
+          const total = coverage.total
+          const lines = [
+            '',
+            '## 发布 Artifact 摘要（自动生成）',
+            '',
+            '| 项 | 值 |',
+            '| ---- | ---- |',
+            '| 版本 | ' + manifest.version + ' |',
+            '| git HEAD | ' + String(manifest.gitHead) + ' |',
+            '| tarball sha256 | ' + manifest.tarballSha256 + ' |',
+            '| SBOM sha256 | ' + manifest.sbom.sha256 + ' |',
+            '| 运行时依赖 | ' + manifest.sbom.runtimeDependencies + ' |',
+            '| 许可证组件 | ' + manifest.sbom.componentCount + ' |',
+            '| dist-weapp raw | ' + size.distWeappBytes + ' B |',
+            '| 核心闭包 raw | ' + size.coreClosureBytes + ' B |',
+            '| 覆盖率 lines | ' + total.lines.pct + '% |',
+            '| 覆盖率 branches | ' + total.branches.pct + '% |',
+            '',
+            '完整 manifest 见 artifact release-manifest；SBOM 见 artifact release-sbom。',
+            '',
+          ]
+          fs.appendFileSync('.release/release-notes.md', lines.join('\n'))
+          NODE
+
+      - name: Stage npm package (maintainer 2FA approval required)
+        if: inputs.dry_run == false
+        run: npm stage publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create draft GitHub Release (publish after npm approval)
+        if: inputs.dry_run == false
+        run: |
+          gh release create "v${{ inputs.version }}" \
+            --draft \
+            --title "v${{ inputs.version }}" \
+            --notes-file .release/release-notes.md \
+            .release/*.tgz .release/release-manifest.json sbom.cdx.json
+        env:
+          GH_TOKEN: ${{ github.token }}

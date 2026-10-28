@@ -1,0 +1,7 @@
+{
+  "distWeappBytes": 114625,
+  "distWeappGzipBytes": 48396,
+  "coreClosureBytes": 95517,
+  "recordedAt": "2026-10-28",
+  "note": "v0.1.0 发布基线：raw 114,625B；预算 120KB（余量约 8.1KB）；每版本增长容差 +2KB 或 +3%。"
+}
